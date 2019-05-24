@@ -4,7 +4,6 @@ import android.util.SparseArray
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
-import java.util.*
 
 class ViewTeam private constructor(container: ViewGroup) {
     companion object {
@@ -69,15 +68,15 @@ class ViewTeam private constructor(container: ViewGroup) {
             return this
         }
 
-        mTeams.get(mCurrentId).updateVisibility(View.GONE)
+        mTeams.safetyGet(mCurrentId).updateVisibility(View.GONE)
         mCurrentId = teamId
-        mTeams.get(mCurrentId).updateVisibility(View.VISIBLE)
+        mTeams.safetyGet(mCurrentId).updateVisibility(View.VISIBLE)
 
         return this
     }
 
     fun removeTeam(teamId: Int): ViewTeam {
-        val views = mTeams.get(teamId)
+        val views = mTeams.get(teamId) ?: return this
         mContainer.removeViews(views)
         views.clear()
         mTeams.delete(teamId)
@@ -91,11 +90,6 @@ class ViewTeam private constructor(container: ViewGroup) {
         if (mContainer.childCount == 0) {
             return
         }
-        var list = mTeams.get(0)
-        if (list == null) {
-            list = LinkedList()
-            mTeams.put(0, list)
-        }
-        list.addAll(mContainer.children.toLinkedList())
+        mTeams.safetyGet(0).addAll(mContainer.children.toLinkedList())
     }
 }
