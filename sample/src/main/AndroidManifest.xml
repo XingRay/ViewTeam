@@ -26,6 +26,7 @@
                 android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".page.test.RecyclerViewTestActivity"/>
         <activity android:name=".page.test.FragmentTestActivity"/>
+        <activity android:name=".page.test.JavaTestActivity"/>
     </application>
 
 </manifest>

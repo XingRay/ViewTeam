@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.leixing.recycleradapter.BaseViewHolder
 import com.leixing.recycleradapter.RecyclerAdapter
 import com.xingray.sample.R
-import com.xingray.sample.page.test.FragmentTestActivity
+import com.xingray.sample.page.test.JavaTestActivity
 import com.xingray.sample.page.test.RecyclerViewTestActivity
 import com.xingray.sample.page.test.SimpleTestActivity
 
@@ -38,12 +38,15 @@ class MainActivity : AppCompatActivity() {
             Test("simple test") {
                 SimpleTestActivity.start(applicationContext)
             },
+            Test("java test") {
+                JavaTestActivity.start(applicationContext)
+            },
             Test("recyclerview test") {
                 RecyclerViewTestActivity.start(applicationContext)
-            },
-            Test("fragment test") {
-                FragmentTestActivity.start(applicationContext)
             }
+//            Test("fragment test") {
+//                FragmentTestActivity.start(applicationContext)
+//            }
         ))
     }
 

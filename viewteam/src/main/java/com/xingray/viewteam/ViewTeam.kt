@@ -8,6 +8,7 @@ import java.util.*
 
 class ViewTeam private constructor(container: ViewGroup) {
     companion object {
+        @JvmStatic
         fun of(container: ViewGroup): ViewTeam {
             return ViewTeam(container)
         }

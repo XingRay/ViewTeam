@@ -29,6 +29,7 @@ class SimpleTestActivity : Activity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_simple_test)
+
         val views = intArrayOf(R.id.bt_0, R.id.bt_1, R.id.bt_2, R.id.bt_3).map { findViewById<View>(it) }
         val viewTeam = ViewTeam.of(findViewById(R.id.cl_root))
             .inflate(1, R.layout.team_01).inTeam(1, views)
@@ -63,7 +64,7 @@ class SimpleTestActivity : Activity() {
         }
 
         viewTeam.addTeamChangedListener { old, new ->
-            showToast(application, "$old->$new")
+            showToast("$old->$new")
         }.addTeamChangedListener(object : TeamChangeListener {
             override fun onTeamChanged(oldTeamId: Int, newTeamId: Int) {
                 Log.i(TAG, "$oldTeamId->$newTeamId")
