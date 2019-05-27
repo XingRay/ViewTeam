@@ -37,24 +37,8 @@ class ViewTeam private constructor(container: ViewGroup) {
         })
     }
 
-//    fun inTeam(teamId: Int, viewIds: IntArray): ViewTeam {
-//        val list = mTeams.safetyGet(teamId)
-//        viewIds.forEach {
-//            val view = mContainer.findViewById<View>(it)
-//            list.add(view)
-//            setVisibility(view, teamId)
-//        }
-//        getCurrentViews()?.forEach { it.visibility = View.VISIBLE }
-//        return this
-//    }
-
     fun inTeam(teamId: Int, vararg views: View): ViewTeam {
-        val list = mTeams.safetyGet(teamId)
-        views.forEach {
-            list.add(it)
-            setVisibility(it, teamId)
-        }
-        getCurrentViews()?.forEach { it.visibility = View.VISIBLE }
+        inTeam(teamId, views.map { it })
         return this
     }
 
