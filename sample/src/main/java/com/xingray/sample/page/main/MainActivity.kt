@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.leixing.recycleradapter.BaseViewHolder
 import com.leixing.recycleradapter.RecyclerAdapter
 import com.xingray.sample.R
+import com.xingray.sample.page.test.FragmentTestActivity
+import com.xingray.sample.page.test.RecyclerViewTestActivity
 import com.xingray.sample.page.test.SimpleTestActivity
 
 class MainActivity : AppCompatActivity() {
@@ -32,15 +34,17 @@ class MainActivity : AppCompatActivity() {
         rvList?.adapter = adapter
         rvList?.addItemDecoration(DividerItemDecoration(applicationContext, DividerItemDecoration.VERTICAL))
 
-        adapter.update(
-            listOf(
-                Test("simple test") {
-                    SimpleTestActivity.start(applicationContext)
-                }, Test("") {
-
-                }
-            )
-        )
+        adapter.update(listOf(
+            Test("simple test") {
+                SimpleTestActivity.start(applicationContext)
+            },
+            Test("recyclerview test") {
+                RecyclerViewTestActivity.start(applicationContext)
+            },
+            Test("fragment test") {
+                FragmentTestActivity.start(applicationContext)
+            }
+        ))
     }
 
     data class Test(
