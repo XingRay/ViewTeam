@@ -36,13 +36,13 @@ class MainActivity : AppCompatActivity() {
 
         adapter.update(listOf(
             Test("simple test") {
-                SimpleTestActivity.start(applicationContext)
+                SimpleTestActivity.start(this)
             },
             Test("java test") {
-                JavaTestActivity.start(applicationContext)
+                JavaTestActivity.start(this)
             },
             Test("recyclerview test") {
-                RecyclerViewTestActivity.start(applicationContext)
+                RecyclerViewTestActivity.start(this)
             }
 //            Test("fragment test") {
 //                FragmentTestActivity.start(applicationContext)

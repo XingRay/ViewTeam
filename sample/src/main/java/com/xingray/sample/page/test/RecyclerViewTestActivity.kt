@@ -20,12 +20,12 @@ import com.xingray.viewteam.ViewTeam
 
 class RecyclerViewTestActivity : Activity() {
     companion object {
-        fun start(context: Context) {
-            val intent = Intent()
-            intent.setClass(context, RecyclerViewTestActivity::class.java)
-            context.startActivity(intent)
+        fun start(activity: Activity) {
+            val starter = Intent(activity.applicationContext, RecyclerViewTestActivity::class.java)
+            activity.startActivity(starter)
         }
     }
+
 
     var rvList: RecyclerView? = null
 

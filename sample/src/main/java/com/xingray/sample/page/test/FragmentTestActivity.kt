@@ -1,7 +1,6 @@
 package com.xingray.sample.page.test
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import com.xingray.sample.R
@@ -9,12 +8,12 @@ import com.xingray.sample.R
 class FragmentTestActivity : Activity() {
 
     companion object {
-        fun start(context: Context) {
-            val intent = Intent()
-            intent.setClass(context, FragmentTestActivity::class.java)
-            context.startActivity(intent)
+        fun start(activity: Activity) {
+            val starter = Intent(activity.applicationContext, FragmentTestActivity::class.java)
+            activity.startActivity(starter)
         }
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

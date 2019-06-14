@@ -23,9 +23,9 @@ import kotlin.jvm.functions.Function2;
 public class JavaTestActivity extends Activity {
     private static final String TAG = "JavaTestActivity";
 
-    public static void start(Context context) {
-        Intent starter = new Intent(context, JavaTestActivity.class);
-        context.startActivity(starter);
+    public static void start(Activity activity) {
+        Intent starter = new Intent(activity.getApplicationContext(), JavaTestActivity.class);
+        activity.startActivity(starter);
     }
 
     @Override

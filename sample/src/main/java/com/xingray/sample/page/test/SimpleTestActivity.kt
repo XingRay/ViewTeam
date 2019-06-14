@@ -1,7 +1,6 @@
 package com.xingray.sample.page.test
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -17,13 +16,14 @@ import com.xingray.viewteam.ViewTeam
 class SimpleTestActivity : Activity() {
 
     companion object {
-        val TAG: String? = SimpleTestActivity::class.java.canonicalName
-        fun start(context: Context) {
-            val intent = Intent()
-            intent.setClass(context, SimpleTestActivity::class.java)
-            context.startActivity(intent)
+        private val TAG = SimpleTestActivity::class.java.simpleName
+
+        fun start(activity: Activity) {
+            val starter = Intent(activity.applicationContext, SimpleTestActivity::class.java)
+            activity.startActivity(starter)
         }
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
