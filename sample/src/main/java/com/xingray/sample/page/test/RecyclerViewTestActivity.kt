@@ -1,7 +1,6 @@
 package com.xingray.sample.page.test
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -66,9 +65,9 @@ class RecyclerViewTestActivity : Activity() {
         button.layoutParams = constraintLayoutParams
 
         val views = intArrayOf(R.id.bt_0, R.id.bt_1, R.id.bt_2, R.id.bt_3)
-        val viewTeam = ViewTeam.of(findViewById(R.id.cl_root))
-            .merge(1, R.layout.view_team_empty).inTeam(1, *views)
-            .inflate(2, R.layout.view_team_loading).inTeam(2, *views)
+        val viewTeam = ViewTeam(findViewById(R.id.cl_root), true)
+            .lazyMerge(1, R.layout.view_team_empty).inTeam(1, *views)
+            .lazyInflate(2, R.layout.view_team_loading).inTeam(2, *views)
             .addView(3, button).inTeam(3, *views)
 
         findViewById<View>(R.id.bt_0).setOnClickListener {

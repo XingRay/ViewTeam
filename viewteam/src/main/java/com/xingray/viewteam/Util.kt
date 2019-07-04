@@ -1,6 +1,7 @@
 package com.xingray.viewteam
 
 import android.util.SparseArray
+import android.util.SparseIntArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,7 +41,7 @@ fun ViewGroup.merge(layoutId: Int): MutableList<View> {
 }
 
 fun ViewGroup.getChildren(): MutableList<View> {
-    val views = LinkedList<View>()
+    val views = mutableListOf<View>()
     for (view in children) {
         views.add(view)
     }
@@ -78,4 +79,12 @@ fun <E> SparseArray<MutableList<E>>.safetyGet(key: Int): MutableList<E> {
         put(key, list)
     }
     return list
+}
+
+fun SparseIntArray.removeByKey(key: Int) {
+    val index = indexOfKey(key)
+    if (index < 0) {
+        return
+    }
+    removeAt(index)
 }

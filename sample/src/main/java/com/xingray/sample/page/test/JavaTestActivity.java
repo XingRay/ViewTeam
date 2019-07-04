@@ -1,7 +1,6 @@
 package com.xingray.sample.page.test;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -54,8 +53,7 @@ public class JavaTestActivity extends Activity {
         constraintLayoutParams.bottomToBottom = R.id.cl_root;
         button.setLayoutParams(constraintLayoutParams);
 
-
-        final ViewTeam viewTeam = ViewTeam.of(clRoot)
+        final ViewTeam viewTeam = new ViewTeam(clRoot, true)
                 .inflate(1, R.layout.team_01).inTeam(1, views)
                 .addView(2, button).inTeam(2, views)
                 .merge(3, R.layout.team_03).inTeam(3, views);

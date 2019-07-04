@@ -1,28 +1,34 @@
 package com.xingray.viewteam
 
 import android.util.SparseArray
+import android.util.SparseIntArray
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
 import java.util.*
 
-class ViewTeam private constructor(container: ViewGroup) {
+class ViewTeam(container: ViewGroup, autoInTeam: Boolean = false) {
+
     companion object {
-        @JvmStatic
-        fun of(container: ViewGroup): ViewTeam {
-            return ViewTeam(container)
-        }
+        val TEAM_ID_NONE: Int = -1
+        val TEAM_ID_DEFAULT: Int = 0
     }
 
     private val mContainer: ViewGroup = container
     private val mTeams = SparseArray<MutableList<View>>()
-    private var mCurrentId: Int = 0
-    private val mTeamChangedListeners: LinkedList<((Int, Int) -> Unit)> by lazy {
-        LinkedList<((Int, Int) -> Unit)>()
-    }
+    private var mCurrentId: Int = TEAM_ID_NONE
+
+    private val mTeamChangedListeners: LinkedList<((Int, Int) -> Unit)> by lazy { LinkedList<((Int, Int) -> Unit)>() }
+    private val mInitializerList: SparseArray<(List<View>) -> Unit> by lazy { SparseArray<(List<View>) -> Unit>() }
+    private val mLazyInflateLayoutIdList: SparseIntArray by lazy { SparseIntArray() }
+    private val mLazyMergeLayoutIdList: SparseIntArray by lazy { SparseIntArray() }
+
+    constructor(container: ViewGroup) : this(container, false)
 
     init {
-        autoRegister()
+        if (autoInTeam) {
+            autoInTeam()
+        }
     }
 
     fun addView(teamId: Int, view: View): ViewTeam {
@@ -44,6 +50,15 @@ class ViewTeam private constructor(container: ViewGroup) {
     }
 
     fun inTeam(teamId: Int, views: Iterable<View>): ViewTeam {
+        mTeams.safetyGet(teamId).addAll(views)
+        views.forEach {
+            setVisibility(it, teamId)
+        }
+        getCurrentViews()?.forEach { it.visibility = View.VISIBLE }
+        return this
+    }
+
+    fun inTeam(teamId: Int, views: Sequence<View>): ViewTeam {
         mTeams.safetyGet(teamId).addAll(views)
         views.forEach {
             setVisibility(it, teamId)
@@ -88,6 +103,16 @@ class ViewTeam private constructor(container: ViewGroup) {
         return this
     }
 
+    fun lazyInflate(teamId: Int, layoutId: Int): ViewTeam {
+        mLazyInflateLayoutIdList.put(teamId, layoutId)
+        return this
+    }
+
+    fun lazyMerge(teamId: Int, layoutId: Int): ViewTeam {
+        mLazyMergeLayoutIdList.put(teamId, layoutId)
+        return this
+    }
+
     fun setTeam(teamId: Int): ViewTeam {
         if (mCurrentId == teamId) {
             return this
@@ -96,7 +121,28 @@ class ViewTeam private constructor(container: ViewGroup) {
         val oldTeam = mCurrentId
         mTeams.safetyGet(mCurrentId).updateVisibility(View.GONE)
         mCurrentId = teamId
-        mTeams.safetyGet(mCurrentId).updateVisibility(View.VISIBLE)
+
+        val mergeLayoutId = mLazyMergeLayoutIdList[mCurrentId]
+        if (mergeLayoutId != 0) {
+            merge(mCurrentId, mergeLayoutId)
+            mLazyMergeLayoutIdList.removeByKey(mCurrentId)
+        }
+
+        val inflateLayoutId = mLazyInflateLayoutIdList[mCurrentId]
+        if (inflateLayoutId != 0) {
+            inflate(mCurrentId, inflateLayoutId)
+            mLazyInflateLayoutIdList.removeByKey(mCurrentId)
+        }
+
+        val list = mTeams.safetyGet(mCurrentId)
+        list.updateVisibility(View.VISIBLE)
+
+        val initializer = mInitializerList[mCurrentId]
+        if (initializer != null) {
+            initializer.invoke(list)
+            mInitializerList.remove(mCurrentId)
+        }
+
         notifyTeamChanged(oldTeam, teamId)
 
         return this
@@ -114,13 +160,13 @@ class ViewTeam private constructor(container: ViewGroup) {
         return getViewsOfTeam(mCurrentId)
     }
 
-    fun removeTeam(teamId: Int): ViewTeam {
+    fun removeViewsOfTeam(teamId: Int): ViewTeam {
         val views = mTeams.get(teamId) ?: return this
         mContainer.removeViews(views)
         views.clear()
         mTeams.delete(teamId)
         if (mCurrentId == teamId) {
-            setTeam(0)
+            setTeam(TEAM_ID_DEFAULT)
         }
         return this
     }
@@ -135,17 +181,28 @@ class ViewTeam private constructor(container: ViewGroup) {
         return this
     }
 
+    fun addInitializer(teamId: Int, initializer: Initializer): ViewTeam {
+        mInitializerList.put(teamId, initializer::init)
+        return this
+    }
+
+    fun addInitializer(teamId: Int, initializer: (List<View>) -> Unit): ViewTeam {
+        mInitializerList.put(teamId, initializer)
+        return this
+    }
+
     private fun notifyTeamChanged(oldTeam: Int, newTeam: Int) {
         mTeamChangedListeners.forEach {
             it.invoke(oldTeam, newTeam)
         }
     }
 
-    private fun autoRegister() {
+    private fun autoInTeam() {
         if (mContainer.childCount == 0) {
             return
         }
-        mTeams.safetyGet(0).addAll(mContainer.children.toLinkedList())
+        inTeam(TEAM_ID_DEFAULT, mContainer.children)
+        setTeam(TEAM_ID_DEFAULT)
     }
 
     private fun setVisibility(view: View, teamId: Int) {
