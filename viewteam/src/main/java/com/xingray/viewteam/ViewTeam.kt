@@ -7,21 +7,28 @@ import android.view.ViewGroup
 import androidx.core.view.children
 import java.util.*
 
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 class ViewTeam(container: ViewGroup, autoInTeam: Boolean = false) {
 
     companion object {
-        val TEAM_ID_NONE: Int = -1
-        val TEAM_ID_DEFAULT: Int = 0
+        const val TEAM_ID_NONE: Int = -1
+        const val TEAM_ID_DEFAULT: Int = 0
     }
 
     private val mContainer: ViewGroup = container
     private val mTeams = SparseArray<MutableList<View>>()
     private var mCurrentId: Int = TEAM_ID_NONE
 
+    @Suppress("RemoveExplicitTypeArguments")
     private val mTeamChangedListeners: LinkedList<((Int, Int) -> Unit)> by lazy { LinkedList<((Int, Int) -> Unit)>() }
+    @Suppress("RemoveExplicitTypeArguments")
     private val mInitializerList: SparseArray<(List<View>) -> Unit> by lazy { SparseArray<(List<View>) -> Unit>() }
     private val mLazyInflateLayoutIdList: SparseIntArray by lazy { SparseIntArray() }
     private val mLazyMergeLayoutIdList: SparseIntArray by lazy { SparseIntArray() }
+
+    private var mViewTeamHandler: (View, Int, Int) -> Unit = { view, teamId, currentTeamId ->
+        view.visibility = if (teamId == currentTeamId) View.VISIBLE else View.GONE
+    }
 
     constructor(container: ViewGroup) : this(container, false)
 
@@ -34,12 +41,13 @@ class ViewTeam(container: ViewGroup, autoInTeam: Boolean = false) {
     fun addView(teamId: Int, view: View): ViewTeam {
         mContainer.addView(view)
         mTeams.safetyGet(teamId).add(view)
-        setVisibility(view, teamId)
+        handleViewTeam(view, teamId, mCurrentId)
         return this
     }
 
     fun inTeam(teamId: Int, vararg viewIds: Int): ViewTeam {
         return inTeam(teamId, viewIds.map {
+            @Suppress("RemoveExplicitTypeArguments")
             mContainer.findViewById<View>(it)
         })
     }
@@ -52,18 +60,22 @@ class ViewTeam(container: ViewGroup, autoInTeam: Boolean = false) {
     fun inTeam(teamId: Int, views: Iterable<View>): ViewTeam {
         mTeams.safetyGet(teamId).addAll(views)
         views.forEach {
-            setVisibility(it, teamId)
+            handleViewTeam(it, teamId, mCurrentId)
         }
-        getCurrentViews()?.forEach { it.visibility = View.VISIBLE }
+        getCurrentViews()?.forEach {
+            handleViewTeam(it, mCurrentId, mCurrentId)
+        }
         return this
     }
 
     fun inTeam(teamId: Int, views: Sequence<View>): ViewTeam {
         mTeams.safetyGet(teamId).addAll(views)
         views.forEach {
-            setVisibility(it, teamId)
+            handleViewTeam(it, teamId, mCurrentId)
         }
-        getCurrentViews()?.forEach { it.visibility = View.VISIBLE }
+        getCurrentViews()?.forEach {
+            handleViewTeam(it, mCurrentId, mCurrentId)
+        }
         return this
     }
 
@@ -71,7 +83,7 @@ class ViewTeam(container: ViewGroup, autoInTeam: Boolean = false) {
         mContainer.addViews(views)
         mTeams.safetyGet(teamId).addAll(views)
         views.forEach {
-            setVisibility(it, teamId)
+            handleViewTeam(it, teamId, mCurrentId)
         }
         return this
     }
@@ -80,7 +92,7 @@ class ViewTeam(container: ViewGroup, autoInTeam: Boolean = false) {
         mContainer.addViews(views)
         mTeams.safetyGet(teamId).addAll(views)
         views.forEach {
-            setVisibility(it, teamId)
+            handleViewTeam(it, teamId, mCurrentId)
         }
         return this
     }
@@ -89,7 +101,7 @@ class ViewTeam(container: ViewGroup, autoInTeam: Boolean = false) {
         val views = mContainer.addLayout(layoutId)
         mTeams.safetyGet(teamId).addAll(views)
         views.forEach {
-            setVisibility(it, teamId)
+            handleViewTeam(it, teamId, mCurrentId)
         }
         return this
     }
@@ -98,7 +110,7 @@ class ViewTeam(container: ViewGroup, autoInTeam: Boolean = false) {
         val views = mContainer.merge(layoutId)
         mTeams.safetyGet(teamId).addAll(views)
         views.forEach {
-            setVisibility(it, teamId)
+            handleViewTeam(it, teamId, mCurrentId)
         }
         return this
     }
@@ -117,9 +129,11 @@ class ViewTeam(container: ViewGroup, autoInTeam: Boolean = false) {
         if (mCurrentId == teamId) {
             return this
         }
-
         val oldTeam = mCurrentId
-        mTeams.safetyGet(mCurrentId).updateVisibility(View.GONE)
+
+        mTeams.safetyGet(oldTeam).forEach {
+            handleViewTeam(it, oldTeam, teamId)
+        }
         mCurrentId = teamId
 
         val mergeLayoutId = mLazyMergeLayoutIdList[mCurrentId]
@@ -135,7 +149,9 @@ class ViewTeam(container: ViewGroup, autoInTeam: Boolean = false) {
         }
 
         val list = mTeams.safetyGet(mCurrentId)
-        list.updateVisibility(View.VISIBLE)
+        list.forEach {
+            handleViewTeam(it, mCurrentId, mCurrentId)
+        }
 
         val initializer = mInitializerList[mCurrentId]
         if (initializer != null) {
@@ -148,7 +164,7 @@ class ViewTeam(container: ViewGroup, autoInTeam: Boolean = false) {
         return this
     }
 
-    fun getTeamId(): Int {
+    fun getCurrentTeamId(): Int {
         return mCurrentId
     }
 
@@ -191,6 +207,14 @@ class ViewTeam(container: ViewGroup, autoInTeam: Boolean = false) {
         return this
     }
 
+    fun setViewTeamHandler(handler: ViewTeamHandler) {
+        mViewTeamHandler = handler::handleViewTeam
+    }
+
+    fun setViewTeamHandler(handler: (View, Int, Int) -> Unit) {
+        mViewTeamHandler = handler
+    }
+
     private fun notifyTeamChanged(oldTeam: Int, newTeam: Int) {
         mTeamChangedListeners.forEach {
             it.invoke(oldTeam, newTeam)
@@ -205,7 +229,7 @@ class ViewTeam(container: ViewGroup, autoInTeam: Boolean = false) {
         setTeam(TEAM_ID_DEFAULT)
     }
 
-    private fun setVisibility(view: View, teamId: Int) {
-        view.visibility = if (teamId == mCurrentId) View.VISIBLE else View.GONE
+    private fun handleViewTeam(view: View, teamId: Int, currentTeamId: Int) {
+        mViewTeamHandler.invoke(view, teamId, currentTeamId)
     }
 }
