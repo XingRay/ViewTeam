@@ -24,7 +24,7 @@ Add it in your root build.gradle at the end of repositories:
 ``` groovy
 
 	dependencies {
-	        implementation 'com.github.XingRay:ViewTeam:0.2.0'
+	        implementation 'com.github.XingRay:ViewTeam:0.2.1'
 	}
 
 ```
