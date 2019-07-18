@@ -5,7 +5,6 @@ import android.util.SparseIntArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.children
 import java.util.*
 
 fun <T> Sequence<T>.toLinkedList(): LinkedList<T> {
@@ -17,9 +16,9 @@ fun <T> Sequence<T>.toLinkedList(): LinkedList<T> {
 }
 
 fun ViewGroup.addLayout(layoutId: Int): MutableList<View> {
-    val before = children.toList()
+    val before = getChildren()
     LayoutInflater.from(context).inflate(layoutId, this, true)
-    val after = children.toMutableList()
+    val after = getChildren()
     after.removeAll(before)
     return after
 }
@@ -42,8 +41,8 @@ fun ViewGroup.merge(layoutId: Int): MutableList<View> {
 
 fun ViewGroup.getChildren(): MutableList<View> {
     val views = mutableListOf<View>()
-    for (view in children) {
-        views.add(view)
+    for (index in 0 until childCount) {
+        views.add(getChildAt(index))
     }
     return views
 }
