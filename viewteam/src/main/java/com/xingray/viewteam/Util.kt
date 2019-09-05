@@ -59,12 +59,6 @@ fun ViewGroup.addViews(views: Array<View>) {
     }
 }
 
-fun Iterable<View>.updateVisibility(visibility: Int) {
-    forEach {
-        it.visibility = visibility
-    }
-}
-
 fun ViewGroup.removeViews(views: Iterable<View>) {
     views.forEach {
         removeView(it)

@@ -7,8 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.leixing.recycleradapter.BaseViewHolder
-import com.leixing.recycleradapter.RecyclerAdapter
+import com.xingray.recycleradapter.LayoutId
+import com.xingray.recycleradapter.RecyclerAdapter
+import com.xingray.recycleradapter.ViewHolder
 import com.xingray.sample.R
 import com.xingray.sample.page.test.JavaTestActivity
 import com.xingray.sample.page.test.RecyclerViewTestActivity
@@ -24,15 +25,17 @@ class MainActivity : AppCompatActivity() {
 
         rvList = findViewById(R.id.rv_list)
         rvList?.layoutManager = LinearLayoutManager(applicationContext)
-        val adapter = RecyclerAdapter<Test, TestViewHolder>(applicationContext)
-            .itemLayoutId(R.layout.item_main_list)
-            .viewHolderFactory { itemView, _ ->
-                TestViewHolder(itemView)
-            }.itemClickListener { _, _, t ->
-                t?.task?.invoke()
+        val adapter = RecyclerAdapter(applicationContext)
+            .addType(TestViewHolder::class.java) { _, _, t ->
+                t.task.invoke()
             }
         rvList?.adapter = adapter
-        rvList?.addItemDecoration(DividerItemDecoration(applicationContext, DividerItemDecoration.VERTICAL))
+        rvList?.addItemDecoration(
+            DividerItemDecoration(
+                applicationContext,
+                DividerItemDecoration.VERTICAL
+            )
+        )
 
         adapter.update(listOf(
             Test("simple test") {
@@ -41,12 +44,9 @@ class MainActivity : AppCompatActivity() {
             Test("java test") {
                 JavaTestActivity.start(this)
             },
-            Test("recyclerview test") {
+            Test("RecyclerView test") {
                 RecyclerViewTestActivity.start(this)
             }
-//            Test("fragment test") {
-//                FragmentTestActivity.start(applicationContext)
-//            }
         ))
     }
 
@@ -55,11 +55,12 @@ class MainActivity : AppCompatActivity() {
         val task: () -> Unit
     )
 
-    class TestViewHolder(itemView: View) : BaseViewHolder<Test>(itemView) {
+    @LayoutId(R.layout.item_main_list)
+    class TestViewHolder(itemView: View) : ViewHolder<Test>(itemView) {
         private val tvText: TextView? = itemView.findViewById(R.id.tv_text)
 
-        override fun onBindItemView(t: Test?, position: Int) {
-            tvText?.text = t?.name
+        override fun onBindItemView(t: Test, position: Int) {
+            tvText?.text = t.name
         }
     }
 }

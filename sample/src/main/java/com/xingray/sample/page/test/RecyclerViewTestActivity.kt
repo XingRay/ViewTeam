@@ -12,8 +12,9 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.leixing.recycleradapter.BaseViewHolder
-import com.leixing.recycleradapter.RecyclerAdapter
+import com.xingray.recycleradapter.LayoutId
+import com.xingray.recycleradapter.RecyclerAdapter
+import com.xingray.recycleradapter.ViewHolder
 import com.xingray.sample.R
 import com.xingray.viewteam.ViewTeam
 
@@ -37,12 +38,17 @@ class RecyclerViewTestActivity : Activity() {
         rvList = list
         if (list != null) {
             list.layoutManager = LinearLayoutManager(applicationContext)
-            val adapter = RecyclerAdapter<Data, DataViewHolder>(applicationContext)
-                .itemLayoutId(R.layout.item_recyclerview_test_item)
-                .viewHolderFactory { itemView, _ -> DataViewHolder(itemView) }
-                .itemClickListener { _, position, t -> showToast("$position clicked: ${t?.text}") }
+            val adapter = RecyclerAdapter(applicationContext)
+                .addType(DataViewHolder::class.java) { _, position, t ->
+                    showToast("$position clicked: ${t.text}")
+                }
             list.adapter = adapter
-            list.addItemDecoration(DividerItemDecoration(applicationContext, DividerItemDecoration.VERTICAL))
+            list.addItemDecoration(
+                DividerItemDecoration(
+                    applicationContext,
+                    DividerItemDecoration.VERTICAL
+                )
+            )
 
             val dataList = mutableListOf<Data>()
             for (i in 0 until 100) {
@@ -93,10 +99,13 @@ class RecyclerViewTestActivity : Activity() {
 
     data class Data(val text: String)
 
-    class DataViewHolder(itemView: View) : BaseViewHolder<Data>(itemView) {
+    @LayoutId(R.layout.item_recyclerview_test_item)
+    class DataViewHolder(itemView: View) : ViewHolder<Data>(itemView) {
+
         private val tvText: TextView? = itemView.findViewById(R.id.tv_text)
-        override fun onBindItemView(t: Data?, position: Int) {
-            tvText?.text = t?.text
+
+        override fun onBindItemView(t: Data, position: Int) {
+            tvText?.text = t.text
         }
     }
 }
